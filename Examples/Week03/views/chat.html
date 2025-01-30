@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Client</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Can also use this. -->
+    <!-- <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script> -->
+</head>
+<body>
+    <h1>Week 03 | NodeJS Socket.io Lab</h1>
+    <a href="/group">Group Chat</a>
+    <br />
+    <script>
+        const ioClient = io();
+
+        ioClient.on("connect", () => {
+            console.log("Connected to server.");
+            ioClient.send("hi");
+        });
+
+        // Send method calls this 'message' event.
+        ioClient.on("message", (data) => {
+            console.log(`Message from Server: ${data}`);
+        });
+
+        ioClient.on("chat_message", (data) => {
+            const container = document.getElementById("container");
+            const msg = `<p><b>${data.clientId}</b>: ${data.message}</p>`;
+            container.innerHTML += msg;
+        });
+
+        function sendMessage() {
+            // Evoking the custom event.
+            const txtmessage = document.getElementById("message");
+            const data = {
+                clientId: ioClient.id,
+                message: txtmessage.value
+            }
+
+            ioClient.emit("chat_message", data);
+        }
+
+        ioClient.on("disconnect", function () {
+            console.log(`Client disconnected.`);
+        })
+
+    </script>
+
+
+    <input type="text" id="message" name="message" placeholder="Enter message">
+    <button onclick="sendMessage()">Send</button>
+    <div id="container">
+        <p>Chat History</p>
+    </div>
+</body>
+</html>
